@@ -41,14 +41,20 @@ class ControlInputStream
          byteArrayOutputStream.write(temp, 0, read);
          read = inputStream.read(temp);
       }
+
       byteArrayOutputStream.flush();
       byteArrayOutputStream.close();
+
+      inputStream.close();
+
       temp = byteArrayOutputStream.toByteArray();
       byteArrayOutputStream = null;
-      inputStream.close();
+
       final ControlInputStream controlInputStream = new ControlInputStream();
       controlInputStream.data = temp;
+
       temp = null;
+
       return controlInputStream;
    }
 
@@ -166,6 +172,7 @@ class ControlInputStream
       {
          return -1;
       }
+
       return this.data[this.index++] & 0xFF;
    }
 
@@ -214,10 +221,12 @@ class ControlInputStream
       {
          return 0;
       }
+
       if((this.index >= this.data.length) || (this.pause == true))
       {
          return -1;
       }
+
       len = Math.min(len, this.data.length - this.index);
       System.arraycopy(this.data, this.index, b, off, len);
       this.index += len;
@@ -260,6 +269,7 @@ class ControlInputStream
       {
          throw new IllegalArgumentException("position must be in [0, " + this.data.length + "[ not : " + position);
       }
+
       this.index = position;
    }
 

@@ -125,7 +125,12 @@ public class SoundMidi
    @Override
    public long getPosition()
    {
-      return this.sequencer.getMicrosecondPosition();
+      if(this.sequencer != null)
+      {
+         return this.sequencer.getMicrosecondPosition();
+      }
+
+      return 0;
    }
 
    /**
@@ -137,7 +142,12 @@ public class SoundMidi
    @Override
    public boolean isPlaying()
    {
-      return this.sequencer.isRunning();
+      if(this.sequencer != null)
+      {
+         return this.sequencer.isRunning();
+      }
+
+      return false;
    }
 
    /**
@@ -148,6 +158,11 @@ public class SoundMidi
    @Override
    public void play()
    {
+      if(this.sequencer == null)
+      {
+         return;
+      }
+
       this.sequencer.start();
 
       synchronized(this.lock)
@@ -171,6 +186,11 @@ public class SoundMidi
    @Override
    public void setPosition(final long position)
    {
+      if(this.sequencer == null)
+      {
+         return;
+      }
+
       this.sequencer.setMicrosecondPosition(position);
    }
 
@@ -195,6 +215,11 @@ public class SoundMidi
    @Override
    public void stop()
    {
+      if(this.sequencer == null)
+      {
+         return;
+      }
+
       this.sequencer.stop();
    }
 
@@ -207,6 +232,11 @@ public class SoundMidi
    @Override
    public long totalSize()
    {
-      return this.sequencer.getMicrosecondLength();
+      if(this.sequencer != null)
+      {
+         return this.sequencer.getMicrosecondLength();
+      }
+
+      return 0;
    }
 }

@@ -8,10 +8,11 @@
 package jhelp.sound;
 
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
 
 import jhelp.sound.mp3.SoundMP3;
 import jhelp.util.Utilities;
+import jhelp.util.list.Pair;
+import jhelp.util.thread.Mutex;
 import jhelp.util.thread.ThreadManager;
 import jhelp.util.thread.ThreadedSimpleTask;
 
@@ -30,77 +31,109 @@ import jhelp.util.thread.ThreadedSimpleTask;
 public final class JHelpSound
 {
    /** State destroy */
-   private static final int                  SOUND_DESTROY         = 3;
+   private static final int                                    SOUND_DESTROY             = 3;
    /** State loop */
-   private static final int                  SOUND_LOOP            = 2;
+   private static final int                                    SOUND_LOOP                = 2;
    /** State start */
-   private static final int                  SOUND_START           = 0;
+   private static final int                                    SOUND_START               = 0;
    /** State stop */
-   private static final int                  SOUND_STOP            = 1;
-
-   /** Indicates if sound can be destroy */
-   private boolean                           canDestroy;
+   private static final int                                    SOUND_STOP                = 1;
 
    /** Indicates if sound is destroy after playing all loops */
-   private boolean                           destroyOnEnd;
-   /** ID give by developer */
-   private int                               developerId;
-   /** Signal to listeners that sound state changed */
-   private final ThreadedSimpleTask<Integer> fireSoundState        = new ThreadedSimpleTask<Integer>()
-                                                                   {
-                                                                      /**
-                                                                       * Play the action <br>
-                                                                       * <br>
-                                                                       * <b>Parent documentation:</b><br>
-                                                                       * {@inheritDoc}
-                                                                       * 
-                                                                       * @param parameter
-                                                                       *           New sound state
-                                                                       * @see jhelp.util.thread.ThreadedSimpleTask#doSimpleAction(java.lang.Object)
-                                                                       */
-                                                                      @Override
-                                                                      protected void doSimpleAction(final Integer parameter)
-                                                                      {
-                                                                         JHelpSound.this.delayedFireSoundState(parameter);
-                                                                      }
-                                                                   };
-   /** Synchronization lock */
-   private final ReentrantLock               lock;
-   /** Loop left */
-   private int                               loop;
-   /** Sound name */
-   private final String                      name;
-   /** Indicates if sound is pause */
-   private boolean                           pause;
-   /** Real sound play */
-   private Sound                             sound;
-   /** Sound listener */
-   private final SoundListener               soundListenerInternal = new SoundListener()
-                                                                   {
-                                                                      /**
-                                                                       * Call when sound end
-                                                                       * 
-                                                                       * @see jhelp.sound.SoundListener#soundEnd()
-                                                                       */
-                                                                      @Override
-                                                                      public void soundEnd()
-                                                                      {
-                                                                         JHelpSound.this.soundEnd();
-                                                                      }
+   private boolean                                             destroyOnEnd;
 
-                                                                      /**
-                                                                       * Call when sound loop
-                                                                       * 
-                                                                       * @see jhelp.sound.SoundListener#soundLoop()
-                                                                       */
-                                                                      @Override
-                                                                      public void soundLoop()
-                                                                      {
-                                                                         JHelpSound.this.soundLoop();
-                                                                      }
-                                                                   };
+   /** ID give by developer */
+   private int                                                 developerId;
+   /** Signal to listeners that sound state changed */
+   private final ThreadedSimpleTask<Integer>                   fireSoundState            = new ThreadedSimpleTask<Integer>()
+                                                                                         {
+                                                                                            /**
+                                                                                             * Play the action <br>
+                                                                                             * <br>
+                                                                                             * <b>Parent documentation:</b><br>
+                                                                                             * {@inheritDoc}
+                                                                                             * 
+                                                                                             * @param parameter
+                                                                                             *           New sound state
+                                                                                             * @see jhelp.util.thread.ThreadedSimpleTask#doSimpleAction(java.lang.Object)
+                                                                                             */
+                                                                                            @Override
+                                                                                            protected void doSimpleAction(final Integer parameter)
+                                                                                            {
+                                                                                               synchronized(JHelpSound.this.soundListeners)
+                                                                                               {
+                                                                                                  JHelpSound.this.lock.lock();
+
+                                                                                                  JHelpSound.this.canDestroy = false;
+                                                                                                  for(final JHelpSoundListener soundListener : JHelpSound.this.soundListeners)
+                                                                                                  {
+                                                                                                     ThreadManager.THREAD_MANAGER.doThread(JHelpSound.this.fireSoundStateOneListener, new Pair<Integer, JHelpSoundListener>(parameter,
+                                                                                                           soundListener));
+                                                                                                  }
+
+                                                                                                  JHelpSound.this.canDestroy = true;
+                                                                                                  JHelpSound.this.lock.unlock();
+                                                                                               }
+                                                                                            }
+                                                                                         };
+   /** Loop left */
+   private int                                                 loop;
+   /** Sound name */
+   private final String                                        name;
+   /** Indicates if sound is pause */
+   private boolean                                             pause;
+   /** Real sound play */
+   private Sound                                               sound;
+   /** Sound listener */
+   private final SoundListener                                 soundListenerInternal     = new SoundListener()
+                                                                                         {
+                                                                                            /**
+                                                                                             * Call when sound end
+                                                                                             * 
+                                                                                             * @see jhelp.sound.SoundListener#soundEnd()
+                                                                                             */
+                                                                                            @Override
+                                                                                            public void soundEnd()
+                                                                                            {
+                                                                                               JHelpSound.this.soundEnd();
+                                                                                            }
+
+                                                                                            /**
+                                                                                             * Call when sound loop
+                                                                                             * 
+                                                                                             * @see jhelp.sound.SoundListener#soundLoop()
+                                                                                             */
+                                                                                            @Override
+                                                                                            public void soundLoop()
+                                                                                            {
+                                                                                               JHelpSound.this.soundLoop();
+                                                                                            }
+                                                                                         };
+   /** Indicates if sound can be destroy */
+   boolean                                                     canDestroy;
+   /** Fire sound state for one listener */
+   final ThreadedSimpleTask<Pair<Integer, JHelpSoundListener>> fireSoundStateOneListener = new ThreadedSimpleTask<Pair<Integer, JHelpSoundListener>>()
+                                                                                         {
+                                                                                            /**
+                                                                                             * Play the action <br>
+                                                                                             * <br>
+                                                                                             * <b>Parent documentation:</b><br>
+                                                                                             * {@inheritDoc}
+                                                                                             * 
+                                                                                             * @param parameter
+                                                                                             *           New sound state
+                                                                                             * @see jhelp.util.thread.ThreadedSimpleTask#doSimpleAction(java.lang.Object)
+                                                                                             */
+                                                                                            @Override
+                                                                                            protected void doSimpleAction(final Pair<Integer, JHelpSoundListener> parameter)
+                                                                                            {
+                                                                                               JHelpSound.this.delayedFireSoundState(parameter.element2, parameter.element1);
+                                                                                            }
+                                                                                         };
+   /** Synchronization lock */
+   final Mutex                                                 lock;
    /** Sound listeners */
-   private ArrayList<JHelpSoundListener>     soundListeners;
+   final ArrayList<JHelpSoundListener>                         soundListeners;
 
    /**
     * Constructs EngineSound
@@ -112,7 +145,7 @@ public final class JHelpSound
     */
    JHelpSound(final Sound sound, final String name)
    {
-      this.lock = new ReentrantLock();
+      this.lock = new Mutex();
       this.name = name;
       this.sound = sound;
       this.sound.setSoundListener(this.soundListenerInternal);
@@ -122,39 +155,30 @@ public final class JHelpSound
    }
 
    /**
-    * Signal to listeners that sound state change
+    * Signal to a listener that sound state change
     * 
+    * @param soundListener
+    *           Listener to alert
     * @param state
     *           New sound state
     */
-   void delayedFireSoundState(final int state)
+   void delayedFireSoundState(final JHelpSoundListener soundListener, final int state)
    {
-      this.lock.lock();
-
-      this.canDestroy = false;
-
-      for(final JHelpSoundListener soundListener : this.soundListeners)
+      switch(state)
       {
-         switch(state)
-         {
-            case JHelpSound.SOUND_START:
-               soundListener.soundStart(this);
-            break;
-            case JHelpSound.SOUND_LOOP:
-               soundListener.soundLoop(this);
-            break;
-            case JHelpSound.SOUND_STOP:
-               soundListener.soundStop(this);
-            break;
-            case JHelpSound.SOUND_DESTROY:
-               soundListener.soundDestroy(this);
-            break;
-         }
+         case JHelpSound.SOUND_START:
+            soundListener.soundStart(this);
+         break;
+         case JHelpSound.SOUND_LOOP:
+            soundListener.soundLoop(this);
+         break;
+         case JHelpSound.SOUND_STOP:
+            soundListener.soundStop(this);
+         break;
+         case JHelpSound.SOUND_DESTROY:
+            soundListener.soundDestroy(this);
+         break;
       }
-
-      this.canDestroy = true;
-
-      this.lock.unlock();
    }
 
    /**
@@ -221,8 +245,13 @@ public final class JHelpSound
 
       ThreadManager.THREAD_MANAGER.doThread(this.fireSoundState, JHelpSound.SOUND_DESTROY);
 
-      this.sound.destroy();
+      this.lock.lock();
+      if(this.sound != null)
+      {
+         this.sound.destroy();
+      }
       this.sound = null;
+      this.lock.unlock();
 
       while(this.canDestroy == false)
       {
@@ -230,7 +259,6 @@ public final class JHelpSound
       }
 
       this.soundListeners.clear();
-      this.soundListeners = null;
    }
 
    /**
@@ -260,7 +288,18 @@ public final class JHelpSound
     */
    public long getPosition()
    {
-      return this.sound.getPosition();
+      long position = 0;
+
+      this.lock.lock();
+
+      if(this.sound != null)
+      {
+         position = this.sound.getPosition();
+      }
+
+      this.lock.unlock();
+
+      return position;
    }
 
    /**
@@ -290,7 +329,17 @@ public final class JHelpSound
     */
    public boolean isPlaying()
    {
-      return this.sound.isPlaying();
+      boolean playing = false;
+      this.lock.lock();
+
+      if(this.sound != null)
+      {
+         playing = this.sound.isPlaying();
+      }
+
+      this.lock.unlock();
+
+      return playing;
    }
 
    /**
@@ -318,6 +367,8 @@ public final class JHelpSound
     */
    public void pause()
    {
+      this.lock.lock();
+
       this.pause = true;
 
       if(this.sound instanceof SoundMP3)
@@ -328,6 +379,8 @@ public final class JHelpSound
       {
          this.sound.stop();
       }
+
+      this.lock.unlock();
    }
 
    /**
@@ -335,18 +388,25 @@ public final class JHelpSound
     */
    public void play()
    {
-      if(((this.sound instanceof SoundMP3) == true) && (this.pause == true))
-      {
-         ((SoundMP3) this.sound).setPause(false);
-      }
-      else if(this.sound.isPlaying() == false)
-      {
-         ThreadManager.THREAD_MANAGER.doThread(this.fireSoundState, JHelpSound.SOUND_START);
+      this.lock.lock();
 
-         this.sound.play();
+      if(this.sound != null)
+      {
+         if(((this.sound instanceof SoundMP3) == true) && (this.pause == true))
+         {
+            ((SoundMP3) this.sound).setPause(false);
+         }
+         else if(this.sound.isPlaying() == false)
+         {
+            ThreadManager.THREAD_MANAGER.doThread(this.fireSoundState, JHelpSound.SOUND_START);
+
+            this.sound.play();
+         }
       }
 
       this.pause = false;
+
+      this.lock.unlock();
    }
 
    /**
@@ -394,7 +454,14 @@ public final class JHelpSound
     */
    public void setPosition(final long position)
    {
-      this.sound.setPosition(position);
+      this.lock.lock();
+
+      if(this.sound != null)
+      {
+         this.sound.setPosition(position);
+      }
+
+      this.lock.unlock();
    }
 
    /**
@@ -402,11 +469,18 @@ public final class JHelpSound
     */
    public void stop()
    {
-      if(this.sound.isPlaying() == true)
+      this.lock.lock();
+
+      if(this.sound != null)
       {
-         this.sound.stop();
+         if(this.sound.isPlaying() == true)
+         {
+            this.sound.stop();
+         }
+         this.sound.setPosition(0);
       }
-      this.sound.setPosition(0);
+
+      this.lock.unlock();
    }
 
    /**
@@ -416,6 +490,16 @@ public final class JHelpSound
     */
    public long totalSize()
    {
-      return this.sound.totalSize();
+      long size = 0;
+      this.lock.lock();
+
+      if(this.sound != null)
+      {
+         size = this.sound.totalSize();
+      }
+
+      this.lock.unlock();
+
+      return size;
    }
 }

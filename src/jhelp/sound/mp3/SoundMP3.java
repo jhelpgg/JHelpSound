@@ -51,7 +51,10 @@ public class SoundMP3
                                                             {
                                                                try
                                                                {
-                                                                  SoundMP3.this.player.play();
+                                                                  if(SoundMP3.this.player != null)
+                                                                  {
+                                                                     SoundMP3.this.player.play();
+                                                                  }
                                                                }
                                                                catch(final JavaLayerException e)
                                                                {

@@ -41,6 +41,7 @@ public class SoundFactory
     */
    static class CacheElementSound
          extends CacheElement<JHelpSound>
+         implements JHelpSoundListener
    {
       /** Resource file path */
       private File     path;
@@ -155,7 +156,7 @@ public class SoundFactory
                givenName = this.url.toString();
 
                // Get file where sounds are extracted
-               this.path = UtilIO.obtainExternalFile("media/sounds/" + givenName.replace("://", "/"));
+               this.path = UtilIO.obtainExternalFile("media/sounds/" + givenName.replace("://", "/").replace(":/", "/").replace(":", "/"));
 
                // If file dosen't extracted, extract it
                if(this.path.exists() == false)
@@ -202,7 +203,9 @@ public class SoundFactory
                sound = new SoundOther(this.path);
             }
 
-            return new JHelpSound(sound, givenName);
+            final JHelpSound jhelpSound = new JHelpSound(sound, givenName);
+            jhelpSound.addSoundListener(this);
+            return jhelpSound;
          }
          catch(final Exception e)
          {
@@ -212,6 +215,67 @@ public class SoundFactory
          return null;
       }
 
+      /**
+       * Called when sound destroy <br>
+       * <br>
+       * <b>Parent documentation:</b><br>
+       * {@inheritDoc}
+       * 
+       * @param sound
+       *           Detroyed sound
+       * @see jhelp.sound.JHelpSoundListener#soundDestroy(jhelp.sound.JHelpSound)
+       */
+      @Override
+      public void soundDestroy(final JHelpSound sound)
+      {
+         sound.removeSoundListener(this);
+         this.clear();
+      }
+
+      /**
+       * Called when sound loop <br>
+       * <br>
+       * <b>Parent documentation:</b><br>
+       * {@inheritDoc}
+       * 
+       * @param sound
+       *           Looped sound
+       * @see jhelp.sound.JHelpSoundListener#soundLoop(jhelp.sound.JHelpSound)
+       */
+      @Override
+      public void soundLoop(final JHelpSound sound)
+      {
+      }
+
+      /**
+       * Called when sound start <br>
+       * <br>
+       * <b>Parent documentation:</b><br>
+       * {@inheritDoc}
+       * 
+       * @param sound
+       *           Started sound
+       * @see jhelp.sound.JHelpSoundListener#soundStart(jhelp.sound.JHelpSound)
+       */
+      @Override
+      public void soundStart(final JHelpSound sound)
+      {
+      }
+
+      /**
+       * Called when sound stop <br>
+       * <br>
+       * <b>Parent documentation:</b><br>
+       * {@inheritDoc}
+       * 
+       * @param sound
+       *           Stopped sound
+       * @see jhelp.sound.JHelpSoundListener#soundStop(jhelp.sound.JHelpSound)
+       */
+      @Override
+      public void soundStop(final JHelpSound sound)
+      {
+      }
    }
 
    /** Sound cache */

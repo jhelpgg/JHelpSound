@@ -21,6 +21,8 @@ import jhelp.sound.SoundException;
 import jhelp.sound.SoundListener;
 import jhelp.util.Utilities;
 import jhelp.util.debug.Debug;
+import jhelp.util.debug.DebugLevel;
+import jhelp.util.list.Pair;
 import jhelp.util.thread.ThreadManager;
 import jhelp.util.thread.ThreadedVerySimpleTask;
 
@@ -35,14 +37,118 @@ import jhelp.util.thread.ThreadedVerySimpleTask;
 public class SoundOther
       implements Sound
 {
-   /** Audio format */
-   private AudioFormat                  audioFormat;
+   /** For activate/deactivate debug */
+   private static final boolean DEBUG = false;
+
+   /**
+    * Create an audio stream and associated clip from a file
+    * 
+    * @param file
+    *           File to extract sound
+    * @return Created audio stream and associated clip. {@code null} if failed to create
+    */
+   private static final synchronized Pair<AudioInputStream, Clip> createSound(final File file)
+   {
+      AudioInputStream audioInputStream = null;
+      Clip clip = null;
+
+      try
+      {
+         audioInputStream = AudioSystem.getAudioInputStream(file);
+         AudioFormat audioFormat = audioInputStream.getFormat();
+
+         if((audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ULAW) || (audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ALAW))
+         {
+            // Create new format
+            final AudioFormat tmp = new AudioFormat(javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED, audioFormat.getSampleRate(), audioFormat.getSampleSizeInBits() * 2, audioFormat.getChannels(), audioFormat.getFrameSize() * 2,
+                  audioFormat.getFrameRate(), true);
+
+            // Force the stream be the new format
+            audioInputStream = AudioSystem.getAudioInputStream(tmp, audioInputStream);
+            audioFormat = tmp;
+         }
+
+         // Get sound informations
+         final Info info = new Info(Clip.class, audioFormat, (int) audioInputStream.getFrameLength() * audioFormat.getFrameSize());
+
+         if(SoundOther.DEBUG)
+         {
+            Debug.println(DebugLevel.VERBOSE, "Sound : ", file.getAbsolutePath());
+            Debug.println(DebugLevel.VERBOSE, "info : ", info);
+            Debug.println(DebugLevel.VERBOSE, "supported : ", AudioSystem.isLineSupported(info));
+            Debug.println(DebugLevel.VERBOSE, "encoding : ", audioFormat.getEncoding());
+            Debug.println(DebugLevel.VERBOSE, "sample rate : ", audioFormat.getSampleRate());
+            Debug.println(DebugLevel.VERBOSE, "sample size : ", audioFormat.getSampleSizeInBits());
+            Debug.println(DebugLevel.VERBOSE, "chanel : ", audioFormat.getChannels());
+            Debug.println(DebugLevel.VERBOSE, "frame size : ", audioFormat.getFrameSize());
+            Debug.println(DebugLevel.VERBOSE, "frame rate : ", audioFormat.getFrameRate());
+            Debug.println(DebugLevel.VERBOSE, "big endian : ", audioFormat.isBigEndian());
+            Debug.println(DebugLevel.VERBOSE, "buffer size : ", audioInputStream.getFrameLength() * audioFormat.getFrameSize());
+         }
+
+         if(AudioSystem.isLineSupported(info) == false)
+         {
+            throw new SoundException("Info is not supported !");
+         }
+
+         // Create clip for play sound
+         clip = (Clip) AudioSystem.getLine(info);
+
+         // Link the clip to the sound
+         clip.open(audioInputStream);
+
+         return new Pair<AudioInputStream, Clip>(audioInputStream, clip);
+      }
+      catch(final Exception exception)
+      {
+         if(clip != null)
+         {
+            try
+            {
+               clip.flush();
+               clip.close();
+
+               if(SoundOther.DEBUG)
+               {
+                  Debug.printMark(DebugLevel.VERBOSE, "CLIP CLOSE");
+               }
+            }
+            catch(final Exception e)
+            {
+               Debug.printException(e);
+            }
+         }
+         clip = null;
+
+         if(audioInputStream != null)
+         {
+            try
+            {
+               audioInputStream.close();
+
+               if(SoundOther.DEBUG)
+               {
+                  Debug.printMark(DebugLevel.VERBOSE, "AUDIO STREAM CLOSE");
+               }
+            }
+            catch(final Exception e)
+            {
+               Debug.printException(e);
+            }
+         }
+         audioInputStream = null;
+
+         Debug.printException(exception, "Failed to create sound ", file.getAbsolutePath());
+
+         return null;
+      }
+   }
+
    /** Stream for read the sound */
    private AudioInputStream             audioInputStream;
 
    /** Clip that play the sound */
    private Clip                         clip;
-
    /** Listener of sound events */
    private SoundListener                soundListener;
    /** Task that play the sound */
@@ -62,6 +168,7 @@ public class SoundOther
                                                             SoundOther.this.playSound();
                                                          }
                                                       };
+
    /** Alive state */
    boolean                              alive         = false;
 
@@ -79,41 +186,16 @@ public class SoundOther
       // ************************
       // *** Initialize sound ***
       // ************************
-      try
+
+      final Pair<AudioInputStream, Clip> soundInfos = SoundOther.createSound(file);
+
+      if(soundInfos == null)
       {
-         // Get stream
-         this.audioInputStream = AudioSystem.getAudioInputStream(file);
-         // Get format
-         this.audioFormat = this.audioInputStream.getFormat();
-
-         // Try convert format, if need
-         if((this.audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ULAW) || (this.audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ALAW))
-         {
-            // Create new format
-            AudioFormat tmp = new AudioFormat(javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED, this.audioFormat.getSampleRate(), this.audioFormat.getSampleSizeInBits() * 2, this.audioFormat.getChannels(),
-                  this.audioFormat.getFrameSize() * 2, this.audioFormat.getFrameRate(), true);
-
-            // Force the stream be the new format
-            this.audioInputStream = AudioSystem.getAudioInputStream(tmp, this.audioInputStream);
-            this.audioFormat = tmp;
-
-            tmp = null;
-         }
-
-         // Get sound informations
-         Info info = new Info(Clip.class, this.audioInputStream.getFormat(), (int) this.audioInputStream.getFrameLength() * this.audioFormat.getFrameSize());
-
-         // Create clip for play sound
-         this.clip = (Clip) AudioSystem.getLine(info);
-         info = null;
-
-         // Link the clip to the sound
-         this.clip.open(this.audioInputStream);
+         throw new SoundException("Failed to create sound ", file.getAbsolutePath());
       }
-      catch(final Exception exception)
-      {
-         throw new SoundException(exception, "Sound creation failed");
-      }
+
+      this.audioInputStream = soundInfos.element1;
+      this.clip = soundInfos.element2;
    }
 
    /**
@@ -123,17 +205,26 @@ public class SoundOther
    {
       Utilities.sleep(123);
 
-      this.clip.start();
+      if(this.clip != null)
+      {
+         this.clip.start();
+      }
       Utilities.sleep(99);
-      while((this.clip.isActive() == true) && (this.alive == true))
+      while((this.clip != null) && (this.clip.isActive() == true) && (this.alive == true))
       {
          Utilities.sleep(99);
       }
 
-      this.clip.stop();
+      if(this.clip != null)
+      {
+         this.clip.stop();
+      }
       if(this.alive == true)
       {
-         this.clip.setMicrosecondPosition(0);
+         if(this.clip != null)
+         {
+            this.clip.setMicrosecondPosition(0);
+         }
       }
 
       this.alive = false;
@@ -152,8 +243,6 @@ public class SoundOther
    public void destroy()
    {
       this.stop();
-      this.audioFormat = null;
-
       try
       {
          this.audioInputStream.close();
@@ -178,7 +267,12 @@ public class SoundOther
    @Override
    public long getPosition()
    {
-      return this.clip.getMicrosecondPosition();
+      if(this.clip != null)
+      {
+         return this.clip.getMicrosecondPosition();
+      }
+
+      return 0;
    }
 
    /**
@@ -219,7 +313,10 @@ public class SoundOther
    @Override
    public void setPosition(final long position)
    {
-      this.clip.setMicrosecondPosition(position);
+      if(this.clip != null)
+      {
+         this.clip.setMicrosecondPosition(position);
+      }
    }
 
    /**
@@ -255,6 +352,11 @@ public class SoundOther
    @Override
    public long totalSize()
    {
-      return this.clip.getMicrosecondLength();
+      if(this.clip != null)
+      {
+         return this.clip.getMicrosecondLength();
+      }
+
+      return 0;
    }
 }
