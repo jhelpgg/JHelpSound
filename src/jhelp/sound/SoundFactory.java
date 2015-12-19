@@ -1,14 +1,18 @@
 /**
- * Project : game2Dengine<br>
- * Package : jhelp.game2D.engine.sound<br>
- * Class : SoundFactory<br>
- * Date : 9 aoet 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -20,6 +24,7 @@ import jhelp.util.cache.Cache;
 import jhelp.util.cache.CacheElement;
 import jhelp.util.debug.Debug;
 import jhelp.util.io.UtilIO;
+import jhelp.util.resources.Resources;
 
 /**
  * Factory to obtain good sound <br>
@@ -156,7 +161,8 @@ public class SoundFactory
                givenName = this.url.toString();
 
                // Get file where sounds are extracted
-               this.path = UtilIO.obtainExternalFile("media/sounds/" + givenName.replace("://", "/").replace(":/", "/").replace(":", "/"));
+               this.path = UtilIO.obtainExternalFile("media/sounds/"
+                     + givenName.replace("://", "/").replace(":/", "/").replace(":", "/").replace("?", "/").replace("&", "/").replace("=", "/"));
 
                // If file dosen't extracted, extract it
                if(this.path.exists() == false)
@@ -288,7 +294,7 @@ public class SoundFactory
     *           File where the sound lies
     * @return The sound or {@code null} if sound can't be get
     */
-   public static JHelpSound getSoundFromFile(final File file)
+   public static synchronized JHelpSound getSoundFromFile(final File file)
    {
       final String path = file.getAbsolutePath();
 
@@ -303,6 +309,35 @@ public class SoundFactory
    }
 
    /**
+    * Obtain sound from file without using the cache
+    * 
+    * @param path
+    *           Sound file
+    * @return Extracted sound
+    */
+   public static synchronized JHelpSound getSoundFromFileNoCache(final File path)
+   {
+      final String givenName = path.getAbsolutePath();
+      Sound sound = null;
+      final String name = path.getName().toLowerCase();
+
+      if(name.endsWith(".mp3") == true)
+      {
+         sound = new SoundMP3(path);
+      }
+      else if((name.endsWith(".mid") == true) || (name.endsWith(".midi") == true))
+      {
+         sound = new SoundMidi(path);
+      }
+      else
+      {
+         sound = new SoundOther(path);
+      }
+
+      return new JHelpSound(sound, givenName);
+   }
+
+   /**
     * Get sound form resource
     * 
     * @param resourceName
@@ -311,7 +346,7 @@ public class SoundFactory
     *           Reference class to have from where path is relative to
     * @return The sound or {@code null} if sound can't be get
     */
-   public static JHelpSound getSoundFromResource(final String resourceName, final Class<?> referenceClass)
+   public static synchronized JHelpSound getSoundFromResource(final String resourceName, final Class<?> referenceClass)
    {
       JHelpSound sound = SoundFactory.CACHE.get(resourceName);
 
@@ -326,23 +361,173 @@ public class SoundFactory
    }
 
    /**
+    * Obtain sound from resource
+    * 
+    * @param resourceName
+    *           Resource path
+    * @param resources
+    *           Resources where get the sound
+    * @return Extracted sound OR {@code null} if resource not a sound
+    */
+   public static JHelpSound getSoundFromResource(final String resourceName, final Resources resources)
+   {
+      return SoundFactory.getSoundFromURL(resources.obtainResourceURL(resourceName));
+   }
+
+   /**
+    * Obtain sound from resource without using the cache
+    * 
+    * @param resourceName
+    *           Resource path
+    * @param referenceClass
+    *           Reference class for get resource
+    * @return Extracted sound OR {@code null} if resource not a sound
+    * @throws IOException
+    *            On reading issue
+    */
+   public static synchronized JHelpSound getSoundFromResourceNoCache(final String resourceName, final Class<?> referenceClass) throws IOException
+   {
+      final String givenName = resourceName;
+
+      // Get file where sounds are extracted
+      final File path = UtilIO.obtainExternalFile("media/sounds/" + resourceName);
+
+      // If file dosen't extracted, extract it
+      if(path.exists() == false)
+      {
+         UtilIO.createFile(path);
+
+         final InputStream inputStream = referenceClass.getResourceAsStream(resourceName);
+         final OutputStream outputStream = new FileOutputStream(path);
+         final byte[] temp = new byte[4096];
+
+         int read = inputStream.read(temp);
+         while(read >= 0)
+         {
+            outputStream.write(temp, 0, read);
+
+            read = inputStream.read(temp);
+         }
+
+         outputStream.flush();
+         outputStream.close();
+         inputStream.close();
+      }
+
+      // Choose the right implementation of sound according to file
+      // extention
+      Sound sound = null;
+      final String name = path.getName().toLowerCase();
+
+      if(name.endsWith(".mp3") == true)
+      {
+         sound = new SoundMP3(path);
+      }
+      else if((name.endsWith(".mid") == true) || (name.endsWith(".midi") == true))
+      {
+         sound = new SoundMidi(path);
+      }
+      else
+      {
+         sound = new SoundOther(path);
+      }
+
+      final JHelpSound jhelpSound = new JHelpSound(sound, givenName);
+      return jhelpSound;
+   }
+
+   /**
+    * Obtain sound from resource without using cache
+    * 
+    * @param resourceName
+    *           Resource path
+    * @param resources
+    *           Resources where get the sound
+    * @return Extracted sound
+    * @throws IOException
+    *            On reading issue
+    */
+   public static JHelpSound getSoundFromResourceNoCache(final String resourceName, final Resources resources) throws IOException
+   {
+      return SoundFactory.getSoundFromURLNoCache(resources.obtainResourceURL(resourceName));
+   }
+
+   /**
     * Get sound form url
     * 
     * @param url
     *           URL where the sound lies
     * @return The sound or {@code null} if sound can't be get
     */
-   public static JHelpSound getSoundFromURL(final URL url)
+   public static synchronized JHelpSound getSoundFromURL(final URL url)
    {
+      final File file = new File(url.getFile());
+
+      if(file.exists() == true)
+      {
+         return SoundFactory.getSoundFromFile(file);
+      }
+
       final String path = url.toString();
 
       JHelpSound sound = SoundFactory.CACHE.get(path);
+
       if(sound == null)
       {
          SoundFactory.CACHE.add(path, new CacheElementSound(url));
 
          sound = SoundFactory.CACHE.get(path);
       }
+
       return sound;
+   }
+
+   /**
+    * Obtain sound from URL without using the cache
+    * 
+    * @param url
+    *           URL where get the sound
+    * @return Extracted sound
+    * @throws IOException
+    *            On reading issue
+    */
+   public static synchronized JHelpSound getSoundFromURLNoCache(final URL url) throws IOException
+   {
+      final File file = new File(url.getFile());
+
+      if(file.exists() == true)
+      {
+         return SoundFactory.getSoundFromFileNoCache(file);
+      }
+
+      final String givenName = url.toString();
+
+      // Get file where sounds are extracted
+      final File path = UtilIO.obtainExternalFile("media/sounds/"
+            + givenName.replace("://", "/").replace(":/", "/").replace(":", "/").replace("?", "/").replace("&", "/").replace("=", "/"));
+
+      // If file dosen't extracted, extract it
+      if(path.exists() == false)
+      {
+         UtilIO.createFile(path);
+
+         final InputStream inputStream = url.openStream();
+         final OutputStream outputStream = new FileOutputStream(path);
+         final byte[] temp = new byte[4096];
+
+         int read = inputStream.read(temp);
+         while(read >= 0)
+         {
+            outputStream.write(temp, 0, read);
+
+            read = inputStream.read(temp);
+         }
+
+         outputStream.flush();
+         outputStream.close();
+         inputStream.close();
+      }
+
+      return SoundFactory.getSoundFromFileNoCache(path);
    }
 }

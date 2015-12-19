@@ -1,9 +1,12 @@
 /**
- * Project : JHelpSound<br>
- * Package : jhelp.sound<br>
- * Class : JHelpSoundListener<br>
- * Date : 21 juil. 2010<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound;
 
@@ -17,6 +20,22 @@ package jhelp.sound;
  */
 public interface JHelpSoundListener
 {
+   /**
+    * Call when sound destroy
+    * 
+    * @param sound
+    *           Destroyed sound
+    */
+   public void soundDestroy(JHelpSound sound);
+
+   /**
+    * Call when sound loop
+    * 
+    * @param sound
+    *           Looped sound
+    */
+   public void soundLoop(JHelpSound sound);
+
    /**
     * Call when sound start
     * 
@@ -32,20 +51,4 @@ public interface JHelpSoundListener
     *           Stopped sound
     */
    public void soundStop(JHelpSound sound);
-
-   /**
-    * Call when sound loop
-    * 
-    * @param sound
-    *           Looped sound
-    */
-   public void soundLoop(JHelpSound sound);
-
-   /**
-    * Call when sound destroy
-    * 
-    * @param sound
-    *           Destroyed sound
-    */
-   public void soundDestroy(JHelpSound sound);
 }

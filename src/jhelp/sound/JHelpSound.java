@@ -1,9 +1,12 @@
 /**
- * Project : game2Dengine<br>
- * Package : jhelp.sound<br>
- * Class : EngineSound<br>
- * Date : 9 aoet 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound;
 
@@ -67,8 +70,10 @@ public final class JHelpSound
                                                                                                   JHelpSound.this.canDestroy = false;
                                                                                                   for(final JHelpSoundListener soundListener : JHelpSound.this.soundListeners)
                                                                                                   {
-                                                                                                     ThreadManager.THREAD_MANAGER.doThread(JHelpSound.this.fireSoundStateOneListener, new Pair<Integer, JHelpSoundListener>(parameter,
-                                                                                                           soundListener));
+                                                                                                     ThreadManager.THREAD_MANAGER.doThread(
+                                                                                                           JHelpSound.this.fireSoundStateOneListener,
+                                                                                                           new Pair<Integer, JHelpSoundListener>(parameter,
+                                                                                                                 soundListener));
                                                                                                   }
 
                                                                                                   JHelpSound.this.canDestroy = true;
@@ -125,9 +130,11 @@ public final class JHelpSound
                                                                                              * @see jhelp.util.thread.ThreadedSimpleTask#doSimpleAction(java.lang.Object)
                                                                                              */
                                                                                             @Override
-                                                                                            protected void doSimpleAction(final Pair<Integer, JHelpSoundListener> parameter)
+                                                                                            protected void doSimpleAction(
+                                                                                                  final Pair<Integer, JHelpSoundListener> parameter)
                                                                                             {
-                                                                                               JHelpSound.this.delayedFireSoundState(parameter.element2, parameter.element1);
+                                                                                               JHelpSound.this.delayedFireSoundState(parameter.element2,
+                                                                                                     parameter.element1);
                                                                                             }
                                                                                          };
    /** Synchronization lock */
@@ -224,14 +231,17 @@ public final class JHelpSound
     */
    public void addSoundListener(final JHelpSoundListener soundListener)
    {
-      this.lock.lock();
-
-      if(this.soundListeners.contains(soundListener) == false)
+      synchronized(JHelpSound.this.soundListeners)
       {
-         this.soundListeners.add(soundListener);
-      }
+         this.lock.lock();
 
-      this.lock.unlock();
+         if(this.soundListeners.contains(soundListener) == false)
+         {
+            this.soundListeners.add(soundListener);
+         }
+
+         this.lock.unlock();
+      }
    }
 
    /**
@@ -255,7 +265,7 @@ public final class JHelpSound
 
       while(this.canDestroy == false)
       {
-         Utilities.sleep(123);
+         Utilities.sleep(8);
       }
 
       this.soundListeners.clear();
@@ -417,11 +427,14 @@ public final class JHelpSound
     */
    public void removeSoundListener(final JHelpSoundListener soundListener)
    {
-      this.lock.lock();
+      synchronized(JHelpSound.this.soundListeners)
+      {
+         this.lock.lock();
 
-      this.soundListeners.remove(soundListener);
+         this.soundListeners.remove(soundListener);
 
-      this.lock.unlock();
+         this.lock.unlock();
+      }
    }
 
    /**

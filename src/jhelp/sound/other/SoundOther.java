@@ -1,14 +1,16 @@
 /**
- * Project : game2Dengine<br>
- * Package : jhelp.sound.other<br>
- * Class : SoundOther<br>
- * Date : 9 aoet 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound.other;
 
 import java.io.File;
-import java.io.IOException;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -57,11 +59,12 @@ public class SoundOther
          audioInputStream = AudioSystem.getAudioInputStream(file);
          AudioFormat audioFormat = audioInputStream.getFormat();
 
-         if((audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ULAW) || (audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ALAW))
+         if((audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ULAW)
+               || (audioFormat.getEncoding() == javax.sound.sampled.AudioFormat.Encoding.ALAW))
          {
             // Create new format
-            final AudioFormat tmp = new AudioFormat(javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED, audioFormat.getSampleRate(), audioFormat.getSampleSizeInBits() * 2, audioFormat.getChannels(), audioFormat.getFrameSize() * 2,
-                  audioFormat.getFrameRate(), true);
+            final AudioFormat tmp = new AudioFormat(javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED, audioFormat.getSampleRate(),
+                  audioFormat.getSampleSizeInBits() * 2, audioFormat.getChannels(), audioFormat.getFrameSize() * 2, audioFormat.getFrameRate(), true);
 
             // Force the stream be the new format
             audioInputStream = AudioSystem.getAudioInputStream(tmp, audioInputStream);
@@ -203,22 +206,35 @@ public class SoundOther
     */
    void playSound()
    {
-      Utilities.sleep(123);
+      Utilities.sleep(8);
 
       if(this.clip != null)
       {
          this.clip.start();
       }
-      Utilities.sleep(99);
-      while((this.clip != null) && (this.clip.isActive() == true) && (this.alive == true))
+      Utilities.sleep(8);
+      while((this.clip != null) && (this.clip.isRunning() == true) && (this.alive == true))
       {
-         Utilities.sleep(99);
+         Utilities.sleep(8);
       }
 
+      if(SoundOther.DEBUG)
+      {
+         Debug.println(DebugLevel.VERBOSE, "Sound play finished");
+      }
+
+      long time = System.nanoTime();
       if(this.clip != null)
       {
          this.clip.stop();
       }
+      time = System.nanoTime() - time;
+
+      if(SoundOther.DEBUG)
+      {
+         Debug.println(DebugLevel.VERBOSE, "Sound stoped : ", time);
+      }
+
       if(this.alive == true)
       {
          if(this.clip != null)
@@ -240,14 +256,25 @@ public class SoundOther
     * @see jhelp.sound.Sound#destroy()
     */
    @Override
-   public void destroy()
+   public synchronized void destroy()
    {
+      this.alive = false;
+      this.soundListener = null;
+      if(this.clip != null)
+      {
+         this.clip.stop();
+         this.clip.close();
+      }
+      this.clip = null;
       this.stop();
       try
       {
-         this.audioInputStream.close();
+         if(this.audioInputStream != null)
+         {
+            this.audioInputStream.close();
+         }
       }
-      catch(final IOException e)
+      catch(final Exception e)
       {
          Debug.printException(e);
       }

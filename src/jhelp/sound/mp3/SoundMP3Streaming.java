@@ -10,13 +10,10 @@
  */
 package jhelp.sound.mp3;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
-import jhelp.sound.Sound;
 import jhelp.sound.SoundException;
 import jhelp.sound.SoundListener;
 import jhelp.util.debug.Debug;
@@ -31,11 +28,10 @@ import jhelp.util.thread.ThreadedVerySimpleTask;
  * 
  * @author JHelp
  */
-public class SoundMP3
-      implements Sound
+public class SoundMP3Streaming
 {
    /** Stream we can control the reading */
-   private ControlInputStream           controlInputStream;
+   private ControlBufferedInputStream   controlInputStream;
    /** Listner of sound events */
    private SoundListener                soundListener;
    /** Task that play the sound */
@@ -54,9 +50,9 @@ public class SoundMP3
                                                             {
                                                                try
                                                                {
-                                                                  if(SoundMP3.this.player != null)
+                                                                  if(SoundMP3Streaming.this.player != null)
                                                                   {
-                                                                     SoundMP3.this.player.play();
+                                                                     SoundMP3Streaming.this.player.play();
                                                                   }
                                                                }
                                                                catch(final JavaLayerException e)
@@ -64,7 +60,7 @@ public class SoundMP3
                                                                   Debug.printException(e);
                                                                }
 
-                                                               SoundMP3.this.playEnd();
+                                                               SoundMP3Streaming.this.playEnd();
                                                             }
                                                          };
 
@@ -76,24 +72,14 @@ public class SoundMP3
    Player                               player;
 
    /**
-    * Constructs SoundMP3
+    * Create a new instance of SoundMP3Streaming
     * 
-    * @param file
-    *           File where found the sound
-    * @throws SoundException
-    *            On initialisation problem
+    * @param inputStream
+    *           Stream to read
     */
-   public SoundMP3(final File file)
-         throws SoundException
+   public SoundMP3Streaming(final InputStream inputStream)
    {
-      try
-      {
-         this.controlInputStream = ControlInputStream.createControlInputStream(new FileInputStream(file));
-      }
-      catch(final IOException e)
-      {
-         throw new SoundException("Reading stream problem", e);
-      }
+      this.controlInputStream = new ControlBufferedInputStream(inputStream);
    }
 
    /**
@@ -121,10 +107,7 @@ public class SoundMP3
 
    /**
     * Destroy the sound
-    * 
-    * @see jhelp.sound.Sound#destroy()
     */
-   @Override
    public void destroy()
    {
       if(this.player != null)
@@ -148,24 +131,11 @@ public class SoundMP3
    }
 
    /**
-    * Sound actual position
-    * 
-    * @return Sound actual position
-    * @see jhelp.sound.Sound#getPosition()
-    */
-   @Override
-   public long getPosition()
-   {
-      return this.controlInputStream.getPosition();
-   }
-
-   /**
     * Indicates if sound is playing
     * 
     * @return {@code true} if sound is playing
     * @see jhelp.sound.Sound#isPlaying()
     */
-   @Override
    public boolean isPlaying()
    {
       return this.alive;
@@ -176,7 +146,6 @@ public class SoundMP3
     * 
     * @see jhelp.sound.Sound#play()
     */
-   @Override
    public void play()
    {
       synchronized(this.lock)
@@ -214,26 +183,12 @@ public class SoundMP3
    }
 
    /**
-    * Change sound position
-    * 
-    * @param position
-    *           Sound position
-    * @see jhelp.sound.Sound#setPosition(long)
-    */
-   @Override
-   public void setPosition(final long position)
-   {
-      this.controlInputStream.setPosition((int) position);
-   }
-
-   /**
     * Change sound listener
     * 
     * @param soundListener
     *           New sound listener
     * @see jhelp.sound.Sound#setSoundListener(jhelp.sound.SoundListener)
     */
-   @Override
    public void setSoundListener(final SoundListener soundListener)
    {
       this.soundListener = soundListener;
@@ -244,37 +199,8 @@ public class SoundMP3
     * 
     * @see jhelp.sound.Sound#stop()
     */
-   @Override
    public void stop()
    {
-      if(this.player != null)
-      {
-         this.player.close();
-      }
-
-      this.player = null;
-      synchronized(this.lock)
-      {
-         this.alive = false;
-      }
-   }
-
-   /**
-    * Sound total size
-    * 
-    * @return Sound total size
-    * @see jhelp.sound.Sound#totalSize()
-    */
-   @Override
-   public long totalSize()
-   {
-      try
-      {
-         return this.controlInputStream.available();
-      }
-      catch(final Exception exception)
-      {
-         return -1;
-      }
+      this.destroy();
    }
 }

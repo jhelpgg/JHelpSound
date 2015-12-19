@@ -1,9 +1,12 @@
 /**
- * Project : game2Dengine<br>
- * Package : jhelp.game2D.engine.sound<br>
- * Class : Sound<br>
- * Date : 9 aoet 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound;
 
@@ -18,28 +21,9 @@ package jhelp.sound;
 public interface Sound
 {
    /**
-    * Play the sound.<br>
-    * Launch the playing and return immediately.<br>
-    * Never waits than sounds end
-    */
-   public void play();
-
-   /**
-    * Stop the sound
-    */
-   public void stop();
-
-   /**
     * Destroy the sound
     */
    public void destroy();
-
-   /**
-    * Sound total size
-    * 
-    * @return Sound total size
-    */
-   public long totalSize();
 
    /**
     * Sound position
@@ -47,6 +31,20 @@ public interface Sound
     * @return Sound position
     */
    public long getPosition();
+
+   /**
+    * Indicates if sound is playing
+    * 
+    * @return {@code true} if sound is playing
+    */
+   public boolean isPlaying();
+
+   /**
+    * Play the sound.<br>
+    * Launch the playing and return immediately.<br>
+    * Never waits than sounds end
+    */
+   public void play();
 
    /**
     * Change sound position
@@ -57,17 +55,22 @@ public interface Sound
    public void setPosition(long position);
 
    /**
-    * Indicates if sound is playing
-    * 
-    * @return {@code true} if sound is playing
-    */
-   public boolean isPlaying();
-
-   /**
     * Define the sound listener
     * 
     * @param soundListener
     *           Sound listener
     */
    public void setSoundListener(SoundListener soundListener);
+
+   /**
+    * Stop the sound
+    */
+   public void stop();
+
+   /**
+    * Sound total size
+    * 
+    * @return Sound total size
+    */
+   public long totalSize();
 }

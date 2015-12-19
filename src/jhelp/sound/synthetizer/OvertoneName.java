@@ -1,9 +1,12 @@
 /**
- * Project : JHelpSound<br>
- * Package : jhelp.sound.synthetizer<br>
- * Class : OvertoneName<br>
- * Date : 28 mars 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound.synthetizer;
 
@@ -48,9 +51,9 @@ public enum OvertoneName
     *           Overtone range
     * @return Overtone name
     */
-   public static OvertoneName obtainOvertoneName(int overtone)
+   public static OvertoneName obtainOvertoneName(final int overtone)
    {
-      for(OvertoneName overtoneName : OvertoneName.values())
+      for(final OvertoneName overtoneName : OvertoneName.values())
       {
          if(overtoneName.overtone == overtone)
          {
@@ -69,9 +72,36 @@ public enum OvertoneName
     * @param overtone
     *           Overtone range
     */
-   OvertoneName(int overtone)
+   OvertoneName(final int overtone)
    {
       this.overtone = overtone;
+   }
+
+   /**
+    * Add # to overtone name
+    * 
+    * @return Overtone name with #
+    */
+   public OvertoneName addSharp()
+   {
+      switch(this)
+      {
+         case C:
+            return OvertoneName.C_SHARP;
+         case D:
+            return OvertoneName.D_SHARP;
+         case F:
+            return OvertoneName.F_SHARP;
+         case G:
+            return OvertoneName.G_SHARP;
+         case H:
+            return OvertoneName.H_SHARP;
+         case E:
+         case I:
+            throw new IllegalStateException("Can't add sharp for E or I");
+         default:
+            return this;
+      }
    }
 
    /**
@@ -101,9 +131,9 @@ public enum OvertoneName
          case H:
          case I:
             return false;
+         default:
+            return true;
       }
-
-      return true;
    }
 
    /**
@@ -125,33 +155,8 @@ public enum OvertoneName
             return OvertoneName.G;
          case H_SHARP:
             return OvertoneName.H;
+         default:
+            return this;
       }
-      return this;
-   }
-
-   /**
-    * Add # to overtone name
-    * 
-    * @return Overtone name with #
-    */
-   public OvertoneName addSharp()
-   {
-      switch(this)
-      {
-         case C:
-            return OvertoneName.C_SHARP;
-         case D:
-            return OvertoneName.D_SHARP;
-         case F:
-            return OvertoneName.F_SHARP;
-         case G:
-            return OvertoneName.G_SHARP;
-         case H:
-            return OvertoneName.H_SHARP;
-         case E:
-         case I:
-            throw new IllegalStateException("Can't add sharp for E or I");
-      }
-      return this;
    }
 }

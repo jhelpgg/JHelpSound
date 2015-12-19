@@ -1,9 +1,12 @@
 /**
- * Project : JHelpSound<br>
- * Package : jhelp.sound.synthetizer<br>
- * Class : Synthetyser<br>
- * Date : 28 mars 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound.synthetizer;
 
@@ -185,8 +188,11 @@ public class Synthetiser
                                                                      int count = morsel.getNumberOfPartition();
                                                                      if(count > Synthetiser.this.midiChannels.length)
                                                                      {
-                                                                        Debug.println(DebugLevel.WARNING, "Not enough chanel are able to play all morsel, only ", Synthetiser.this.midiChannels.length,
-                                                                              " first partitions will play. Number ignored=", (count - Synthetiser.this.midiChannels.length));
+                                                                        Debug.println(DebugLevel.WARNING,
+                                                                              "Not enough chanel are able to play all morsel, only ",
+                                                                              Synthetiser.this.midiChannels.length,
+                                                                              " first partitions will play. Number ignored=",
+                                                                              (count - Synthetiser.this.midiChannels.length));
                                                                         count = Synthetiser.this.midiChannels.length;
                                                                      }
                                                                      final Partition[] partitions = new Partition[count];
@@ -238,7 +244,8 @@ public class Synthetiser
                                                                                     strength = overtoneGroup.getStrength();
                                                                                     for(final Overtone overtone : overtoneGroup)
                                                                                     {
-                                                                                       Synthetiser.this.midiChannels[i].noteOn(overtone.getOvertoneCode(), strength);
+                                                                                       Synthetiser.this.midiChannels[i].noteOn(overtone.getOvertoneCode(),
+                                                                                             strength);
                                                                                     }
                                                                                  }
                                                                                  overtoneGroup.timePass++;
@@ -673,8 +680,8 @@ public class Synthetiser
       if(this.alive == true)
       {
          this.alive = false;
-
-         this.fireSynthetyserStopPlay();
       }
+
+      this.fireSynthetyserStopPlay();
    }
 }

@@ -1,9 +1,12 @@
 /**
- * Project : JHelpSound<br>
- * Package : jhelp.sound.synthetizer<br>
- * Class : Morsel<br>
- * Date : 28 mars 2009<br>
- * By JHelp
+ * <h1>License :</h1> <br>
+ * The following code is deliver as is. I take care that code compile and work, but I am not responsible about any damage it may
+ * cause.<br>
+ * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
+ * modify this code. The code is free for usage and modification, you can't change that fact.<br>
+ * <br>
+ * 
+ * @author JHelp
  */
 package jhelp.sound.synthetizer;
 
@@ -141,7 +144,8 @@ public class Morsel
        * @see jhelp.xml.ParseXMLlistener#startMakup(java.lang.String, java.util.Hashtable)
        */
       @Override
-      public void startMakup(final String markupName, final Hashtable<String, String> parameters) throws MissingRequiredParameterException, InvalidParameterValueException
+      public void startMakup(final String markupName, final Hashtable<String, String> parameters) throws MissingRequiredParameterException,
+            InvalidParameterValueException
       {
          if(markupName.equals(Morsel.MARKUP_PARTITION) == true)
          {
@@ -181,7 +185,8 @@ public class Morsel
             }
             catch(final Exception exception)
             {
-               throw new InvalidParameterValueException(Morsel.MARKUP_OVERTONE_GROUP_time, Morsel.MARKUP_OVERTONE_GROUP, "Is not a double : " + parameter, exception);
+               throw new InvalidParameterValueException(Morsel.MARKUP_OVERTONE_GROUP_time, Morsel.MARKUP_OVERTONE_GROUP, "Is not a double : " + parameter,
+                     exception);
             }
             if(time < 0)
             {
@@ -198,7 +203,8 @@ public class Morsel
             }
             catch(final Exception exception)
             {
-               throw new InvalidParameterValueException(Morsel.MARKUP_OVERTONE_GROUP_strength, Morsel.MARKUP_OVERTONE_GROUP, "Is not a int : " + parameter, exception);
+               throw new InvalidParameterValueException(Morsel.MARKUP_OVERTONE_GROUP_strength, Morsel.MARKUP_OVERTONE_GROUP, "Is not a int : " + parameter,
+                     exception);
             }
             if(strength < 0)
             {
@@ -241,7 +247,8 @@ public class Morsel
             }
             catch(final Exception exception)
             {
-               throw new InvalidParameterValueException(Morsel.MARKUP_OVERTONE_overtoneName, Morsel.MARKUP_OVERTONE_GROUP, "Is not a valid overtone : " + parameter, exception);
+               throw new InvalidParameterValueException(Morsel.MARKUP_OVERTONE_overtoneName, Morsel.MARKUP_OVERTONE_GROUP, "Is not a valid overtone : "
+                     + parameter, exception);
             }
             this.overtoneGroup.addOvertone(Overtone.obtainOvertone(gamut, overtoneName));
          }
