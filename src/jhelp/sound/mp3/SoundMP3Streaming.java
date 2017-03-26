@@ -150,7 +150,7 @@ public class SoundMP3Streaming
    {
       synchronized(this.lock)
       {
-         if(this.alive == false)
+         if(!this.alive)
          {
             this.alive = true;
 

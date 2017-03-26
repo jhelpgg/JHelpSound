@@ -64,7 +64,7 @@ public enum OvertoneName
    }
 
    /** Overtone range */
-   private int overtone;
+   private final int overtone;
 
    /**
     * Constructs OvertoneName

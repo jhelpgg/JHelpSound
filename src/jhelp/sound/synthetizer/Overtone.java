@@ -21,7 +21,7 @@ package jhelp.sound.synthetizer;
 public class Overtone
 {
    /** Already created overtones */
-   private static Overtone overtones[][] = new Overtone[10][12];
+   private static final Overtone[][] overtones = new Overtone[10][12];
 
    /**
     * Obtain/create overtone

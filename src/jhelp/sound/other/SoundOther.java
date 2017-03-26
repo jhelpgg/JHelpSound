@@ -49,7 +49,7 @@ public class SoundOther
     *           File to extract sound
     * @return Created audio stream and associated clip. {@code null} if failed to create
     */
-   private static final synchronized Pair<AudioInputStream, Clip> createSound(final File file)
+   private static synchronized Pair<AudioInputStream, Clip> createSound(final File file)
    {
       AudioInputStream audioInputStream = null;
       Clip clip = null;
@@ -89,7 +89,7 @@ public class SoundOther
             Debug.println(DebugLevel.VERBOSE, "buffer size : ", audioInputStream.getFrameLength() * audioFormat.getFrameSize());
          }
 
-         if(AudioSystem.isLineSupported(info) == false)
+         if(!AudioSystem.isLineSupported(info))
          {
             throw new SoundException("Info is not supported !");
          }
@@ -213,7 +213,7 @@ public class SoundOther
          this.clip.start();
       }
       Utilities.sleep(8);
-      while((this.clip != null) && (this.clip.isRunning() == true) && (this.alive == true))
+      while((this.clip != null) && (this.clip.isRunning()) && (this.alive))
       {
          Utilities.sleep(8);
       }
@@ -235,7 +235,7 @@ public class SoundOther
          Debug.println(DebugLevel.VERBOSE, "Sound stoped : ", time);
       }
 
-      if(this.alive == true)
+      if(this.alive)
       {
          if(this.clip != null)
          {
@@ -322,7 +322,7 @@ public class SoundOther
    @Override
    public void play()
    {
-      if(this.alive == false)
+      if(!this.alive)
       {
          this.alive = true;
 

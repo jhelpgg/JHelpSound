@@ -48,7 +48,7 @@ public class SoundMidi
                                                            @Override
                                                            protected void doVerySimpleAction()
                                                            {
-                                                              if(SoundMidi.this.isPlaying() == true)
+                                                              if(SoundMidi.this.isPlaying())
                                                               {
                                                                  ThreadManager.THREAD_MANAGER.delayedThread(this, null, 123);
 
@@ -170,7 +170,7 @@ public class SoundMidi
 
       synchronized(this.lock)
       {
-         if(this.alive == false)
+         if(!this.alive)
          {
             this.alive = true;
 

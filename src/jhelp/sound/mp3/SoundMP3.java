@@ -181,7 +181,7 @@ public class SoundMP3
    {
       synchronized(this.lock)
       {
-         if(this.alive == false)
+         if(!this.alive)
          {
             this.alive = true;
 

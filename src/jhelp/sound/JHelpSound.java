@@ -5,7 +5,7 @@
  * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
  * modify this code. The code is free for usage and modification, you can't change that fact.<br>
  * <br>
- * 
+ *
  * @author JHelp
  */
 package jhelp.sound;
@@ -28,7 +28,7 @@ import jhelp.util.thread.ThreadedSimpleTask;
  * <br>
  * Last modification : 9 aoet 2009<br>
  * Version 0.0.0<br>
- * 
+ *
  * @author JHelp
  */
 public final class JHelpSound
@@ -55,7 +55,7 @@ public final class JHelpSound
                                                                                              * <br>
                                                                                              * <b>Parent documentation:</b><br>
                                                                                              * {@inheritDoc}
-                                                                                             * 
+                                                                                             *
                                                                                              * @param parameter
                                                                                              *           New sound state
                                                                                              * @see jhelp.util.thread.ThreadedSimpleTask#doSimpleAction(java.lang.Object)
@@ -68,12 +68,19 @@ public final class JHelpSound
                                                                                                   JHelpSound.this.lock.lock();
 
                                                                                                   JHelpSound.this.canDestroy = false;
-                                                                                                  for(final JHelpSoundListener soundListener : JHelpSound.this.soundListeners)
+
+                                                                                                  try
                                                                                                   {
-                                                                                                     ThreadManager.THREAD_MANAGER.doThread(
-                                                                                                           JHelpSound.this.fireSoundStateOneListener,
-                                                                                                           new Pair<Integer, JHelpSoundListener>(parameter,
-                                                                                                                 soundListener));
+                                                                                                     for(final JHelpSoundListener soundListener : JHelpSound.this.soundListeners)
+                                                                                                     {
+                                                                                                        ThreadManager.THREAD_MANAGER.doThread(
+                                                                                                              JHelpSound.this.fireSoundStateOneListener,
+                                                                                                              new Pair<Integer, JHelpSoundListener>(parameter,
+                                                                                                                    soundListener));
+                                                                                                     }
+                                                                                                  }
+                                                                                                  catch(final Exception ignored)
+                                                                                                  {
                                                                                                   }
 
                                                                                                   JHelpSound.this.canDestroy = true;
@@ -94,7 +101,7 @@ public final class JHelpSound
                                                                                          {
                                                                                             /**
                                                                                              * Call when sound end
-                                                                                             * 
+                                                                                             *
                                                                                              * @see jhelp.sound.SoundListener#soundEnd()
                                                                                              */
                                                                                             @Override
@@ -105,7 +112,7 @@ public final class JHelpSound
 
                                                                                             /**
                                                                                              * Call when sound loop
-                                                                                             * 
+                                                                                             *
                                                                                              * @see jhelp.sound.SoundListener#soundLoop()
                                                                                              */
                                                                                             @Override
@@ -124,7 +131,7 @@ public final class JHelpSound
                                                                                              * <br>
                                                                                              * <b>Parent documentation:</b><br>
                                                                                              * {@inheritDoc}
-                                                                                             * 
+                                                                                             *
                                                                                              * @param parameter
                                                                                              *           New sound state
                                                                                              * @see jhelp.util.thread.ThreadedSimpleTask#doSimpleAction(java.lang.Object)
@@ -144,7 +151,7 @@ public final class JHelpSound
 
    /**
     * Constructs EngineSound
-    * 
+    *
     * @param sound
     *           Embed sound
     * @param name
@@ -163,7 +170,7 @@ public final class JHelpSound
 
    /**
     * Signal to a listener that sound state change
-    * 
+    *
     * @param soundListener
     *           Listener to alert
     * @param state
@@ -171,6 +178,11 @@ public final class JHelpSound
     */
    void delayedFireSoundState(final JHelpSoundListener soundListener, final int state)
    {
+      if(soundListener == null)
+      {
+         return;
+      }
+
       switch(state)
       {
          case JHelpSound.SOUND_START:
@@ -193,7 +205,7 @@ public final class JHelpSound
     */
    void soundEnd()
    {
-      if(this.pause == true)
+      if(this.pause)
       {
          return;
       }
@@ -210,7 +222,7 @@ public final class JHelpSound
 
       ThreadManager.THREAD_MANAGER.doThread(this.fireSoundState, JHelpSound.SOUND_STOP);
 
-      if(this.destroyOnEnd == true)
+      if(this.destroyOnEnd)
       {
          this.destroy();
       }
@@ -225,7 +237,7 @@ public final class JHelpSound
 
    /**
     * add sound listener
-    * 
+    *
     * @param soundListener
     *           New sound listener
     */
@@ -235,7 +247,7 @@ public final class JHelpSound
       {
          this.lock.lock();
 
-         if(this.soundListeners.contains(soundListener) == false)
+         if(!this.soundListeners.contains(soundListener))
          {
             this.soundListeners.add(soundListener);
          }
@@ -263,17 +275,22 @@ public final class JHelpSound
       this.sound = null;
       this.lock.unlock();
 
-      while(this.canDestroy == false)
+      while(!this.canDestroy)
       {
          Utilities.sleep(8);
       }
 
-      this.soundListeners.clear();
+      synchronized(this.soundListeners)
+      {
+         this.lock.lock();
+         this.soundListeners.clear();
+         this.lock.unlock();
+      }
    }
 
    /**
     * Return developerId
-    * 
+    *
     * @return developerId
     */
    public int getDeveloperId()
@@ -283,7 +300,7 @@ public final class JHelpSound
 
    /**
     * Return name
-    * 
+    *
     * @return name
     */
    public String getName()
@@ -293,7 +310,7 @@ public final class JHelpSound
 
    /**
     * Sound position
-    * 
+    *
     * @return Sound position
     */
    public long getPosition()
@@ -314,7 +331,7 @@ public final class JHelpSound
 
    /**
     * Return destroyOnEnd
-    * 
+    *
     * @return destroyOnEnd
     */
    public boolean isDestroyOnEnd()
@@ -324,7 +341,7 @@ public final class JHelpSound
 
    /**
     * Indicates if sound is pause
-    * 
+    *
     * @return {@code true} if sound is pause
     */
    public boolean isPause()
@@ -334,7 +351,7 @@ public final class JHelpSound
 
    /**
     * Indicates if sound is playing
-    * 
+    *
     * @return {@code true} if sound is playing
     */
    public boolean isPlaying()
@@ -362,7 +379,7 @@ public final class JHelpSound
 
    /**
     * Loop the sound
-    * 
+    *
     * @param loop
     *           Number of loop
     */
@@ -385,7 +402,7 @@ public final class JHelpSound
       {
          ((SoundMP3) this.sound).setPause(true);
       }
-      else if(this.sound.isPlaying() == true)
+      else if(this.sound.isPlaying())
       {
          this.sound.stop();
       }
@@ -402,11 +419,11 @@ public final class JHelpSound
 
       if(this.sound != null)
       {
-         if(((this.sound instanceof SoundMP3) == true) && (this.pause == true))
+         if(((this.sound instanceof SoundMP3)) && (this.pause))
          {
             ((SoundMP3) this.sound).setPause(false);
          }
-         else if(this.sound.isPlaying() == false)
+         else if(!this.sound.isPlaying())
          {
             ThreadManager.THREAD_MANAGER.doThread(this.fireSoundState, JHelpSound.SOUND_START);
 
@@ -421,7 +438,7 @@ public final class JHelpSound
 
    /**
     * Remove sound listener
-    * 
+    *
     * @param soundListener
     *           Listener to remove
     */
@@ -431,7 +448,13 @@ public final class JHelpSound
       {
          this.lock.lock();
 
-         this.soundListeners.remove(soundListener);
+         try
+         {
+            this.soundListeners.remove(soundListener);
+         }
+         catch(final Exception ignored)
+         {
+         }
 
          this.lock.unlock();
       }
@@ -439,7 +462,7 @@ public final class JHelpSound
 
    /**
     * Modify destroyOnEnd
-    * 
+    *
     * @param destroyOnEnd
     *           New destroyOnEnd value
     */
@@ -450,7 +473,7 @@ public final class JHelpSound
 
    /**
     * Modify developerId
-    * 
+    *
     * @param developerId
     *           New developerId value
     */
@@ -461,7 +484,7 @@ public final class JHelpSound
 
    /**
     * Change sound position
-    * 
+    *
     * @param position
     *           Sound position
     */
@@ -486,7 +509,7 @@ public final class JHelpSound
 
       if(this.sound != null)
       {
-         if(this.sound.isPlaying() == true)
+         if(this.sound.isPlaying())
          {
             this.sound.stop();
          }
@@ -498,7 +521,7 @@ public final class JHelpSound
 
    /**
     * Sound total size
-    * 
+    *
     * @return Sound total size
     */
    public long totalSize()

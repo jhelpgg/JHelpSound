@@ -22,6 +22,7 @@ import jhelp.util.Utilities;
 import jhelp.util.debug.Debug;
 import jhelp.util.debug.DebugLevel;
 
+@SuppressWarnings("PointlessArithmeticExpression")
 public class Frequency
       extends InputStream
 {
@@ -50,18 +51,19 @@ public class Frequency
       NOTE = new int[Frequency.NOTE_LENGTH];
       int index = 0;
 
-      for(int i = 0; i < length; i++)
-      {
-         for(int j = 0; j < repeat; j++)
-         {
-            Frequency.NOTE[index++] = base[i];
-         }
+       for (int aBase : base)
+       {
+           for (int j = 0; j < repeat; j++)
+           {
+               Frequency.NOTE[index++] = aBase;
+           }
 
-         for(int j = 0; j < blank; j++)
-         {
-            Frequency.NOTE[index++] = 0;
-         }
-      }
+          //noinspection ConstantConditions
+          for (int j = 0; j < blank; j++)
+           {
+               Frequency.NOTE[index++] = 0;
+           }
+       }
 
       // NOTE_LENGTH = 256;
       // NOTE = new int[Frequency.NOTE_LENGTH];
@@ -181,6 +183,7 @@ public class Frequency
    public int read() throws IOException
    {
       final byte[] b = new byte[4];
+      //noinspection ResultOfMethodCallIgnored
       this.read(b);
       return b[0] & 0xFF;
    }

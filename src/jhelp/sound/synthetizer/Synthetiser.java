@@ -57,11 +57,11 @@ public class Synthetiser
     */
    public static int computeQuaver(final double time)
    {
-      if(Synthetiser.isWhite(time) == true)
+      if(Synthetiser.isWhite(time))
       {
          return -1;
       }
-      if(Synthetiser.isBlack(time) == true)
+      if(Synthetiser.isBlack(time))
       {
          return 0;
       }
@@ -223,13 +223,13 @@ public class Synthetiser
                                                                      int index;
                                                                      int strength;
                                                                      int countLive;
-                                                                     while(Synthetiser.this.alive == true)
+                                                                     while(Synthetiser.this.alive)
                                                                      {
-                                                                        while((Synthetiser.this.onPause == true) && (Synthetiser.this.alive == true))
+                                                                        while((Synthetiser.this.onPause) && (Synthetiser.this.alive))
                                                                         {
                                                                            Utilities.sleep(100);
                                                                         }
-                                                                        if(Synthetiser.this.alive == true)
+                                                                        if(Synthetiser.this.alive)
                                                                         {
                                                                            countLive = 0;
                                                                            for(int i = 0; i < count; i++)
@@ -572,7 +572,7 @@ public class Synthetiser
     */
    public boolean onPause()
    {
-      return (this.alive == false) || (this.onPause == true);
+      return (!this.alive) || (this.onPause);
    }
 
    /**
@@ -600,7 +600,7 @@ public class Synthetiser
          throw new NullPointerException("morsel musn't be null");
       }
 
-      if(this.alive == true)
+      if(this.alive)
       {
          throw new IllegalStateException("Synthetizer is on play");
       }
@@ -659,7 +659,7 @@ public class Synthetiser
     */
    public void setPause(final boolean pause)
    {
-      if(this.alive == false)
+      if(!this.alive)
       {
          return;
       }
@@ -677,7 +677,7 @@ public class Synthetiser
     */
    public void stop()
    {
-      if(this.alive == true)
+      if(this.alive)
       {
          this.alive = false;
       }

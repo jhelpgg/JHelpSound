@@ -93,11 +93,11 @@ public class Morsel
       @Override
       public void endMarkup(final String markupName) throws UnexpectedEndOfMarkup
       {
-         if(markupName.equals(Morsel.MARKUP_PARTITION) == true)
+         if(markupName.equals(Morsel.MARKUP_PARTITION))
          {
             this.partition = null;
          }
-         else if(markupName.equals(Morsel.MARKUP_OVERTONE_GROUP) == true)
+         else if(markupName.equals(Morsel.MARKUP_OVERTONE_GROUP))
          {
             this.overtoneGroup = null;
          }
@@ -147,7 +147,7 @@ public class Morsel
       public void startMakup(final String markupName, final Hashtable<String, String> parameters) throws MissingRequiredParameterException,
             InvalidParameterValueException
       {
-         if(markupName.equals(Morsel.MARKUP_PARTITION) == true)
+         if(markupName.equals(Morsel.MARKUP_PARTITION))
          {
             this.partition = new Partition();
             final String instrumentName = parameters.get(Morsel.MARKUP_PARTITION_instrument);
@@ -166,7 +166,7 @@ public class Morsel
             }
             Morsel.this.partitions.add(this.partition);
          }
-         else if(markupName.equals(Morsel.MARKUP_OVERTONE_GROUP) == true)
+         else if(markupName.equals(Morsel.MARKUP_OVERTONE_GROUP))
          {
             if(this.partition == null)
             {
@@ -213,7 +213,7 @@ public class Morsel
             this.overtoneGroup = new OvertoneGroup(time, strength);
             this.partition.addOvertoneGroup(this.overtoneGroup);
          }
-         else if(markupName.equals(Morsel.MARKUP_OVERTONE) == true)
+         else if(markupName.equals(Morsel.MARKUP_OVERTONE))
          {
             if(this.overtoneGroup == null)
             {
@@ -303,7 +303,7 @@ public class Morsel
    /** Listener when parsing to create morsel on loading */
    private final MorselParseXMLlistener morselParseXMLlistener;
    /** Partitions list */
-   ArrayList<Partition>                 partitions;
+   final         ArrayList<Partition>                 partitions;
 
    /**
     * Constructs Morsel

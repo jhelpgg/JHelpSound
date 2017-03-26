@@ -108,7 +108,7 @@ class ControlBufferedInputStream
    {
       synchronized(this.lock)
       {
-         if(this.finished == false)
+         if(!this.finished)
          {
             try
             {
@@ -119,7 +119,7 @@ class ControlBufferedInputStream
                Debug.printException(exception);
             }
 
-            if(this.waiting == true)
+            if(this.waiting)
             {
                this.lock.notify();
             }
@@ -236,7 +236,7 @@ class ControlBufferedInputStream
          return 0;
       }
 
-      if((this.finished == true) || (this.pause == true))
+      if((this.finished) || (this.pause))
       {
          return -1;
       }
@@ -319,7 +319,7 @@ class ControlBufferedInputStream
 
          Utilities.sleep(sleep);
 
-         while(this.pause == true)
+         while(this.pause)
          {
             synchronized(this.lock)
             {
@@ -328,7 +328,7 @@ class ControlBufferedInputStream
                {
                   this.lock.wait();
                }
-               catch(final Exception exception)
+               catch(final Exception ignored)
                {
                }
                this.waiting = false;
@@ -363,11 +363,11 @@ class ControlBufferedInputStream
 
       this.pause = pause;
 
-      if(pause == false)
+      if(!pause)
       {
          synchronized(this.lock)
          {
-            if(this.waiting == true)
+            if(this.waiting)
             {
                this.lock.notify();
             }

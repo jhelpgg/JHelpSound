@@ -135,7 +135,7 @@ public class SoundFactory
                this.path = UtilIO.obtainExternalFile("media/sounds/" + this.resourceName);
 
                // If file dosen't extracted, extract it
-               if(this.path.exists() == false)
+               if(!this.path.exists())
                {
                   UtilIO.createFile(this.path);
 
@@ -165,7 +165,7 @@ public class SoundFactory
                      + givenName.replace("://", "/").replace(":/", "/").replace(":", "/").replace("?", "/").replace("&", "/").replace("=", "/"));
 
                // If file dosen't extracted, extract it
-               if(this.path.exists() == false)
+               if(!this.path.exists())
                {
                   UtilIO.createFile(this.path);
 
@@ -196,11 +196,11 @@ public class SoundFactory
             Sound sound = null;
             final String name = this.path.getName().toLowerCase();
 
-            if(name.endsWith(".mp3") == true)
+            if(name.endsWith(".mp3"))
             {
                sound = new SoundMP3(this.path);
             }
-            else if((name.endsWith(".mid") == true) || (name.endsWith(".midi") == true))
+            else if((name.endsWith(".mid")) || (name.endsWith(".midi")))
             {
                sound = new SoundMidi(this.path);
             }
@@ -321,11 +321,11 @@ public class SoundFactory
       Sound sound = null;
       final String name = path.getName().toLowerCase();
 
-      if(name.endsWith(".mp3") == true)
+      if(name.endsWith(".mp3"))
       {
          sound = new SoundMP3(path);
       }
-      else if((name.endsWith(".mid") == true) || (name.endsWith(".midi") == true))
+      else if((name.endsWith(".mid")) || (name.endsWith(".midi")))
       {
          sound = new SoundMidi(path);
       }
@@ -387,13 +387,12 @@ public class SoundFactory
     */
    public static synchronized JHelpSound getSoundFromResourceNoCache(final String resourceName, final Class<?> referenceClass) throws IOException
    {
-      final String givenName = resourceName;
 
-      // Get file where sounds are extracted
+       // Get file where sounds are extracted
       final File path = UtilIO.obtainExternalFile("media/sounds/" + resourceName);
 
       // If file dosen't extracted, extract it
-      if(path.exists() == false)
+      if(!path.exists())
       {
          UtilIO.createFile(path);
 
@@ -419,11 +418,11 @@ public class SoundFactory
       Sound sound = null;
       final String name = path.getName().toLowerCase();
 
-      if(name.endsWith(".mp3") == true)
+      if(name.endsWith(".mp3"))
       {
          sound = new SoundMP3(path);
       }
-      else if((name.endsWith(".mid") == true) || (name.endsWith(".midi") == true))
+      else if((name.endsWith(".mid")) || (name.endsWith(".midi")))
       {
          sound = new SoundMidi(path);
       }
@@ -432,8 +431,7 @@ public class SoundFactory
          sound = new SoundOther(path);
       }
 
-      final JHelpSound jhelpSound = new JHelpSound(sound, givenName);
-      return jhelpSound;
+       return new JHelpSound(sound, resourceName);
    }
 
    /**
@@ -463,7 +461,7 @@ public class SoundFactory
    {
       final File file = new File(url.getFile());
 
-      if(file.exists() == true)
+      if(file.exists())
       {
          return SoundFactory.getSoundFromFile(file);
       }
@@ -495,7 +493,7 @@ public class SoundFactory
    {
       final File file = new File(url.getFile());
 
-      if(file.exists() == true)
+      if(file.exists())
       {
          return SoundFactory.getSoundFromFileNoCache(file);
       }
@@ -507,7 +505,7 @@ public class SoundFactory
             + givenName.replace("://", "/").replace(":/", "/").replace(":", "/").replace("?", "/").replace("&", "/").replace("=", "/"));
 
       // If file dosen't extracted, extract it
-      if(path.exists() == false)
+      if(!path.exists())
       {
          UtilIO.createFile(path);
 

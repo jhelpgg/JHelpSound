@@ -173,13 +173,13 @@ public class SoundGameManager
 
       for(final ResourceElement resourceElement : list)
       {
-         if(resourceElement.isDirectory() == false)
+         if(!resourceElement.isDirectory())
          {
             this.listBackgrounds.add(resourceElement.getPath());
          }
       }
 
-      if(this.listBackgrounds.isEmpty() == true)
+      if(this.listBackgrounds.isEmpty())
       {
          throw new IllegalArgumentException("The given directory " + directoryBackground.getPath() + " is empty");
       }
@@ -221,7 +221,7 @@ public class SoundGameManager
             this.fxSound = null;
          }
 
-         if(this.fxQueue.isEmpty() == true)
+         if(this.fxQueue.isEmpty())
          {
             Debug.println(DebugLevel.VERBOSE, "Queue is empty");
             return;
@@ -253,7 +253,7 @@ public class SoundGameManager
    {
       synchronized(this.backgroundPlaying)
       {
-         if(this.backgroundPlaying.get() == true)
+         if(this.backgroundPlaying.get())
          {
             return;
          }
@@ -290,7 +290,7 @@ public class SoundGameManager
 
       Debug.println(DebugLevel.VERBOSE, "empty=", empty, " fxSound=", this.fxSound);
 
-      if((empty == true) && (this.fxSound == null))
+      if((empty) && (this.fxSound == null))
       {
          Debug.println(DebugLevel.VERBOSE, "call next");
          this.nextFXSound();
@@ -304,7 +304,7 @@ public class SoundGameManager
    {
       synchronized(this.backgroundPlaying)
       {
-         if(this.backgroundPlaying.get() == false)
+         if(!this.backgroundPlaying.get())
          {
             return;
          }

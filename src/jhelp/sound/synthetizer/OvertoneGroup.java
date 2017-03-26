@@ -59,7 +59,7 @@ public class OvertoneGroup
     */
    public void addOvertone(final Overtone overtone)
    {
-      if(this.group.contains(overtone) == false)
+      if(!this.group.contains(overtone))
       {
          this.group.add(overtone);
       }

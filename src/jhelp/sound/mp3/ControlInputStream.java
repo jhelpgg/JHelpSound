@@ -171,7 +171,7 @@ class ControlInputStream
    @Override
    public int read() throws IOException
    {
-      if((this.index >= this.data.length) || (this.pause == true))
+      if((this.index >= this.data.length) || (this.pause))
       {
          return -1;
       }
@@ -225,7 +225,7 @@ class ControlInputStream
          return 0;
       }
 
-      if((this.index >= this.data.length) || (this.pause == true))
+      if((this.index >= this.data.length) || (this.pause))
       {
          return -1;
       }

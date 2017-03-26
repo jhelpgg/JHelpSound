@@ -5,7 +5,7 @@
  * You can use, modify, the code as your need for any usage. But you can't do any action that avoid me or other person use,
  * modify this code. The code is free for usage and modification, you can't change that fact.<br>
  * <br>
- * 
+ *
  * @author JHelp
  */
 package jhelp.sound.frequency;
@@ -27,7 +27,7 @@ import jhelp.util.io.ByteArray;
 
 /**
  * Play frequency
- * 
+ *
  * @author JHelp
  */
 public class JHelpFrequency
@@ -46,7 +46,7 @@ public class JHelpFrequency
 
       /**
        * Create a new instance of FrequencyInformation
-       * 
+       *
        * @param frequency1
        *           Start frequency
        * @param volume1
@@ -67,7 +67,7 @@ public class JHelpFrequency
 
    /**
     * Play thread
-    * 
+    *
     * @author JHelp
     */
    class PlayThread
@@ -85,7 +85,7 @@ public class JHelpFrequency
        * <br>
        * <b>Parent documentation:</b><br>
        * {@inheritDoc}
-       * 
+       *
        * @see java.lang.Thread#run()
        */
       @Override
@@ -95,12 +95,12 @@ public class JHelpFrequency
       }
    }
 
+   /** Maximum frequency */
+   public static final int                  MAX_FREQUENCY    = 4096;
    // sourceDataLine.getFormat()=PCM_SIGNED 44100.0 Hz, 16 bit, stereo, 4 bytes/frame, little-endian
    // sourceDataLine.getBufferSize()=88200
    /** Volume maximum */
-   private static final int                 MAX_VOLUME       = 0x7FFF;
-   /** Maximum frequency */
-   public static final int                  MAX_FREQUENCY    = 4096;
+   public static final int                  MAX_VOLUME       = 0x7FFF;
    /** Minimum frequency */
    public static final int                  MIN_FREQUENCY    = 128;
    /** Rate sample size */
@@ -211,7 +211,7 @@ public class JHelpFrequency
                   Debug.println(DebugLevel.INFORMATION, "sourceDataLine.getFormat()=", sourceDataLine.getFormat());
                   Debug.println(DebugLevel.INFORMATION, "sourceDataLine.getBufferSize()=", sourceDataLine.getBufferSize());
                }
-               catch(final Exception exception2)
+               catch(final Exception ignored)
                {
                }
 
@@ -258,7 +258,7 @@ public class JHelpFrequency
 
    /**
     * Add a frequency
-    * 
+    *
     * @param frequencyChanel1
     *           Start channel
     * @param volume1
@@ -302,7 +302,7 @@ public class JHelpFrequency
 
    /**
     * Obtain the number o bytes necessary for play a given duration
-    * 
+    *
     * @param paramAudioFormat
     *           Audio format to use
     * @param paramInt
@@ -311,7 +311,8 @@ public class JHelpFrequency
     */
    public int millisecondsToBytes(final AudioFormat paramAudioFormat, final int paramInt)
    {
-      return (int) ((paramInt * (paramAudioFormat.getSampleRate() * paramAudioFormat.getChannels() * paramAudioFormat.getSampleSizeInBits())) / (double) JHelpFrequency.SAMPLE_RATE);
+      return (int) ((paramInt * (paramAudioFormat.getSampleRate() * paramAudioFormat.getChannels() * paramAudioFormat.getSampleSizeInBits()))
+            / (double) JHelpFrequency.SAMPLE_RATE);
    }
 
    /**
@@ -353,7 +354,7 @@ public class JHelpFrequency
          {
             this.playThread = null;
 
-            if(this.waiting.get() == true)
+            if(this.waiting.get())
             {
                this.lock.notify();
             }
